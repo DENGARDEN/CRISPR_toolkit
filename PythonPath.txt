@@ -1,1 +1,1 @@
-/media/hkim/Pipeline/Indel_searcher_2/miniconda2/bin/python
+~/anaconda3/envs/CRISPR_toolkit/bin/python3s

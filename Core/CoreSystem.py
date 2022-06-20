@@ -1,12 +1,13 @@
-import os, re, sys, logging
-import subprocess as sp
+import logging
 import multiprocessing as mp
-
-from pdb import set_trace
+import os
+import re
+import subprocess as sp
+import sys
 from datetime import datetime
+from pdb import set_trace
 
 import numpy as np
-
 from CRISPResso2 import CRISPResso2Align
 
 
@@ -18,19 +19,23 @@ class Helper(object):
 
     @staticmethod
     def RemoveNullAndBadKeyword(Sample_list):
-        listSamples = [strRow for strRow in Sample_list.readlines() if strRow not in ["''", '', '""', '\n', '\r', '\r\n']]
+        listSamples = [strRow for strRow in Sample_list.readlines() if
+                       strRow not in ["''", '', '""', '\n', '\r', '\r\n']]
         return listSamples
 
-    @staticmethod ## defensive
+    @staticmethod  ## defensive
     def CheckSameNum(strInputProject, listSamples):
 
-        listProjectNumInInput = [i for i in sp.check_output('ls %s' % strInputProject, shell=True).split('\n') if i != '']
+        listProjectNumInInput = [i for i in
+                                 sp.check_output('ls %s' % strInputProject, shell=True).decode(encoding="utf-8").split(
+                                     '\n') if
+                                 i != '']
 
-        setSamples           = set(listSamples)
+        setSamples = set(listSamples)
         setProjectNumInInput = set(listProjectNumInInput)
 
-        intProjectNumInTxt    = len(listSamples)
-        intProjectNumInInput  = len(listProjectNumInInput)
+        intProjectNumInTxt = len(listSamples)
+        intProjectNumInInput = len(listProjectNumInInput)
 
         if intProjectNumInTxt != len(setSamples - setProjectNumInInput):
             logging.warning('The number of samples in the input folder and in the project list does not matched.')
@@ -39,9 +44,11 @@ class Helper(object):
         else:
             logging.info('The file list is correct, pass\n')
 
-    @staticmethod ## defensive
+    @staticmethod  ## defensive
     def CheckAllDone(strOutputProject, listSamples):
-        intProjectNumInOutput = len([i for i in sp.check_output('ls %s' % strOutputProject, shell=True).split('\n') if i not in ['All_results', 'Log', '']])
+        intProjectNumInOutput = len(
+            [i for i in sp.check_output('ls %s' % strOutputProject, shell=True).decode(encoding="utf-8").split('\n') if
+             i not in ['All_results', 'Log', '']])
 
         if intProjectNumInOutput != len(listSamples):
             logging.warning('The number of samples in the output folder and in the project list does not matched.')
@@ -73,7 +80,7 @@ class Helper(object):
             raise Exception
 
     @staticmethod
-    def CheckIntegrity(strBarcodeFile, strSeq): ## defensive
+    def CheckIntegrity(strBarcodeFile, strSeq):  ## defensive
         rec = re.compile(r'[A|C|G|T|N]')
 
         if ':' in strSeq:
@@ -87,7 +94,7 @@ class Helper(object):
 
     @staticmethod
     def PreventFromRmMistake(strCmd):
-        rec = re.compile(r'rm.+-rf*.+(\.$|\/$|\*$|User$|Input$|Output$)') ## This reg can prevent . / * ./User User ...
+        rec = re.compile(r'rm.+-rf*.+(\.$|\/$|\*$|User$|Input$|Output$)')  ## This reg can prevent . / * ./User User ...
         if re.findall(rec, strCmd):
             raise Exception('%s is critical mistake! never do like this.' % strCmd)
 
@@ -95,7 +102,7 @@ class Helper(object):
 class InitialFolder(object):
 
     def __init__(self, strUser, strProject, strProgram):
-        self.strUser    = strUser
+        self.strUser = strUser
         self.strProject = strProject
         self.strProgram = strProgram
 
@@ -138,7 +145,7 @@ class InitialFolder(object):
         Helper.MakeFolderIfNot(strUserDir)
 
         ## '> ./User/JaeWoo/Test_samples.txt'
-        self.strProjectFile = os.path.join(strUserDir, self.strProject+'.txt')
+        self.strProjectFile = os.path.join(strUserDir, self.strProject + '.txt')
         if not os.path.isfile(self.strProjectFile):
             sp.call('> ' + self.strProjectFile, shell=True)
 
@@ -161,7 +168,6 @@ class InitialFolder(object):
 
 
 class UserFolderAdmin(object):
-
     """
     InitialFolder : out of the loop
     UserFolderAdmin : in the loop
@@ -170,25 +176,23 @@ class UserFolderAdmin(object):
     """
 
     def __init__(self, strSample, strRef, options, strLogPath):
-
-        self.strSample  = strSample
-        self.strRef     = strRef
+        self.strSample = strSample
+        self.strRef = strRef
         self.strLogPath = strLogPath
 
-        self.strUser      = options.user_name
-        self.strProject   = options.project_name
+        self.strUser = options.user_name
+        self.strProject = options.project_name
 
-        self.intCore      = options.multicore
-        self.strGapOpen   = options.gap_open    # CRISPresso aligner option
-        self.strGapExtend = options.gap_extend  # 
-        self.strPython    = options.python
+        self.intCore = options.multicore
+        self.strGapOpen = options.gap_open  # CRISPresso aligner option
+        self.strGapExtend = options.gap_extend  #
+        self.strPython = options.python
 
         self.strOutProjectDir = ''
-        self.strOutSampleDir  = ''
-        self.strRefDir        = ''
+        self.strOutSampleDir = ''
+        self.strRefDir = ''
 
     def MakeSampleFolder(self):
-
         ## './Output/Jaewoo/Test_samples'
         self.strOutProjectDir = './Output/{user}/{project}'.format(user=self.strUser, project=self.strProject)
 
@@ -234,8 +238,8 @@ class CoreGotoh(object):
 
     def __init__(self, strEDNAFULL='', floOg='', floOe=''):
         self.npAlnMatrix = CRISPResso2Align.read_matrix(strEDNAFULL)
-        self.floOg       = floOg
-        self.floOe       = floOe
+        self.floOg = floOg
+        self.floOe = floOe
 
     def GapIncentive(self, strRefSeqAfterBarcode):
         ## cripsress no incentive == gotoh
@@ -245,18 +249,17 @@ class CoreGotoh(object):
 
     def RunCRISPResso2(self, strQuerySeqAfterBarcode, strRefSeqAfterBarcode, npGapIncentive):
         listResult = CRISPResso2Align.global_align(strQuerySeqAfterBarcode.upper(), strRefSeqAfterBarcode.upper(),
-                                                  matrix=self.npAlnMatrix, gap_open=self.floOg, gap_extend=self.floOe,
-                                                  gap_incentive=npGapIncentive)
+                                                   matrix=self.npAlnMatrix, gap_open=self.floOg, gap_extend=self.floOe,
+                                                   gap_incentive=npGapIncentive)
         return listResult
 
 
 def CheckProcessedFiles(Func):
     def Wrapped_func(**kwargs):
-
-        InstInitFolder     = kwargs['InstInitFolder']
-        strInputProject    = kwargs['strInputProject']
-        listSamples        = kwargs['listSamples']
-        logging            = kwargs['logging']
+        InstInitFolder = kwargs['InstInitFolder']
+        strInputProject = kwargs['strInputProject']
+        listSamples = kwargs['listSamples']
+        logging = kwargs['logging']
 
         logging.info('File num check: input folder and project list')
         Helper.CheckSameNum(strInputProject, listSamples)
@@ -271,17 +274,16 @@ def CheckProcessedFiles(Func):
 
 def AttachSeqToIndel(strSample, strBarcodeName, strIndelPos,
                      strRefseq, strQueryseq, dictSub):
-
     listIndelPos = strIndelPos.split('M')
-    intMatch     = int(listIndelPos[0])
+    intMatch = int(listIndelPos[0])
 
     if 'I' in strIndelPos:
-        intInsertion    = int(listIndelPos[1].replace('I', ''))
-        strInDelSeq     = strQueryseq[intMatch:intMatch + intInsertion]
+        intInsertion = int(listIndelPos[1].replace('I', ''))
+        strInDelSeq = strQueryseq[intMatch:intMatch + intInsertion]
 
     elif 'D' in strIndelPos:
-        intDeletion     = int(listIndelPos[1].replace('D', ''))
-        strInDelSeq    = strRefseq[intMatch:intMatch + intDeletion]
+        intDeletion = int(listIndelPos[1].replace('D', ''))
+        strInDelSeq = strRefseq[intMatch:intMatch + intDeletion]
 
     else:
         logging.info('strIndelClass is included I or D. This variable is %s' % strIndelPos)
@@ -295,16 +297,21 @@ def AttachSeqToIndel(strSample, strBarcodeName, strIndelPos,
         dictSub[strSample][strBarcodeName] = {}
 
     try:
+
         dictSub[strSample][strBarcodeName][strBarcodeName + ':' + strInDelPosSeq]['IndelCount'] += 1
     except KeyError:
-        dictSub[strSample][strBarcodeName][strBarcodeName + ':' + strInDelPosSeq] = {'IndelCount':1}
-
+        dictSub[strSample][strBarcodeName][strBarcodeName + ':' + strInDelPosSeq] = {'IndelCount': 1}
 
 
 def RunProgram(sCmd):
-    sp.call(sCmd, shell=True)
+    sp.run(sCmd, shell=True)
+
 
 def RunMulticore(lCmd, iCore):
+    """
+
+    """
+
     for sCmd in lCmd:
         print(sCmd)
 

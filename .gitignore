@@ -102,3 +102,4 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+Indel_searcher_2/FLASH-1.2.11.tar.gz

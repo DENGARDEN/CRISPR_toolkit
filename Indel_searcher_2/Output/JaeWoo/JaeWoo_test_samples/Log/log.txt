@@ -1,8 +1,10 @@
-./Run_indel_searcher.py: 1: import: not found
-./Run_indel_searcher.py: 2: import: not found
-./Run_indel_searcher.py: 3: import: not found
-./Run_indel_searcher.py: 5: import: not found
-./Run_indel_searcher.py: 6: import: not found
-./Run_indel_searcher.py: 7: import: not found
-from: can't read /var/mail/optparse
-./Run_indel_searcher.py: 10: Syntax error: word unexpected (expecting ")")
+nohup: ignoring input
+Program start
+{'multicore': 15, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': '--user', 'user_name': None, 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+File num check: input folder and project list
+The file list is correct, pass
+
+Check that all folder are well created.
+All output folders have been created.
+
+Program end

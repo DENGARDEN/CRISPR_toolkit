@@ -1,0 +1,34 @@
+433100 INFO 2022-06-17 09:22:56,913 : Program start
+433100 INFO 2022-06-17 09:22:56,913 : {'multicore': 8, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': '~/anaconda3/envs/CRISPR_toolkit/bin/python3', 'user_name': 'JaeWoo', 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+433100 INFO 2022-06-17 09:22:56,913 : File num check: input folder and project list
+433100 INFO 2022-06-17 09:22:56,921 : The file list is correct, pass
+
+433100 INFO 2022-06-17 09:22:56,921 : Processing sample : Test_sample	Cas9D7
+
+433100 INFO 2022-06-17 09:22:56,922 : File name : eCas9_rep1_D4.ext
+433100 INFO 2022-06-17 09:22:56,922 : SplitFile
+433100 INFO 2022-06-17 09:22:56,938 : Total lines:400000, Chunk size:400000, Split number:1
+433100 INFO 2022-06-17 09:22:57,494 : MakeReference
+433100 INFO 2022-06-17 09:22:57,494 : MakeIndelSearcherCmd
+433100 INFO 2022-06-17 09:22:57,495 : RunMulticore
+433172 INFO 2022-06-17 09:22:57,840 : Program start : ./Input/JaeWoo/FASTQ/JaeWoo_test_samples/Test_sample/Split_files/eCas9_rep1_D4.ext.fastq_1.fq
+433172 INFO 2022-06-17 09:22:57,841 : File Open
+433172 INFO 2022-06-17 09:22:59,314 : Search barcode INDEL pos
+433172 INFO 2022-06-17 09:23:00,609 : Search INDEL
+433172 INFO 2022-06-17 09:23:19,597 : Calculate INDEL frequency
+433172 INFO 2022-06-17 09:23:19,652 : Make pickle output forward
+433172 INFO 2022-06-17 09:23:20,007 : Program end : ./Input/JaeWoo/FASTQ/JaeWoo_test_samples/Test_sample/Split_files/eCas9_rep1_D4.ext.fastq_1.fq
+433100 INFO 2022-06-17 09:23:20,205 : MakeOutput
+433100 INFO 2022-06-17 09:23:20,799 : Delete tmp pickles
+433100 INFO 2022-06-17 09:23:21,106 : RunIndelFreqCalculator
+433221 INFO 2022-06-17 09:23:21,287 : Indel frequency calculator start: 2022-06-17 09:23:21.287180
+433221 INFO 2022-06-17 09:23:21,336 : Indel frequency calculator end: 2022-06-17 09:23:21.336931
+433226 INFO 2022-06-17 09:23:21,734 : Make a summary result.
+433226 INFO 2022-06-17 09:23:21,824 : The summary result has been completed.
+
+
+433100 INFO 2022-06-17 09:23:21,901 : Check that all folder are well created.
+433100 WARNING 2022-06-17 09:23:21,907 : The number of samples in the output folder and in the project list does not matched.
+433100 WARNING 2022-06-17 09:23:21,908 : Output folder: 1, Project list samples: 6
+
+433100 INFO 2022-06-17 09:23:21,909 : Program end

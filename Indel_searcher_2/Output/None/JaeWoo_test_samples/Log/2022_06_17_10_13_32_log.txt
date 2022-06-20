@@ -1,0 +1,9 @@
+440017 INFO 2022-06-17 10:13:32,518 : Program start
+440017 INFO 2022-06-17 10:13:32,518 : {'multicore': 15, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': '--user', 'user_name': None, 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+440017 INFO 2022-06-17 10:13:32,518 : File num check: input folder and project list
+440017 INFO 2022-06-17 10:13:32,521 : The file list is correct, pass
+
+440017 INFO 2022-06-17 10:13:32,521 : Check that all folder are well created.
+440017 INFO 2022-06-17 10:13:32,524 : All output folders have been created.
+
+440017 INFO 2022-06-17 10:13:32,524 : Program end

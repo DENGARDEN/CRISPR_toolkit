@@ -1,0 +1,13 @@
+363743 INFO 2022-06-15 16:37:27,773 : Program start
+363743 INFO 2022-06-15 16:37:27,773 : {'multicore': 8, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': 'home/shin/anaconda3/envs/CRISPR_toolkit/bin', 'user_name': 'JaeWoo', 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+363743 INFO 2022-06-15 16:37:27,773 : File num check: input folder and project list
+363743 INFO 2022-06-15 16:37:27,785 : The file list is correct, pass
+
+363743 INFO 2022-06-15 16:37:27,786 : Processing sample : Test_sample	Cas9D7
+
+363743 INFO 2022-06-15 16:37:27,786 : File name : eCas9_rep1_D4.ext
+363743 INFO 2022-06-15 16:37:27,786 : SplitFile
+363743 INFO 2022-06-15 16:37:27,803 : Total lines:400000, Chunk size:400000, Split number:1
+363743 INFO 2022-06-15 16:37:28,316 : MakeReference
+363743 INFO 2022-06-15 16:37:28,316 : MakeIndelSearcherCmd
+363743 INFO 2022-06-15 16:38:19,235 : RunMulticore

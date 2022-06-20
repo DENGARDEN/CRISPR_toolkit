@@ -1,0 +1,8 @@
+./Run_indel_searcher.py: 1: import: not found
+./Run_indel_searcher.py: 2: import: not found
+./Run_indel_searcher.py: 3: import: not found
+./Run_indel_searcher.py: 5: import: not found
+./Run_indel_searcher.py: 6: import: not found
+./Run_indel_searcher.py: 7: import: not found
+from: can't read /var/mail/optparse
+./Run_indel_searcher.py: 10: Syntax error: word unexpected (expecting ")")

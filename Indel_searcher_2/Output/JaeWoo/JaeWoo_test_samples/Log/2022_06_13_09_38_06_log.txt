@@ -1,0 +1,3 @@
+184272 INFO 2022-06-13 09:38:06,181 : Program start
+184272 INFO 2022-06-13 09:38:06,181 : {'multicore': 8, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': 'home/shin/anaconda3/envs/CRISPR_toolkit/bin', 'user_name': 'JaeWoo', 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+184272 INFO 2022-06-13 09:38:06,181 : File num check: input folder and project list

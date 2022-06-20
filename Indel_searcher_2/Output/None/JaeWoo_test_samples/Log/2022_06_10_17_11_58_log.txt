@@ -1,0 +1,3 @@
+16676 INFO 2022-06-10 17:11:58,160 : Program start
+16676 INFO 2022-06-10 17:11:58,160 : {'multicore': 15, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': '--user', 'user_name': None, 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+16676 INFO 2022-06-10 17:11:58,160 : File num check: input folder and project list

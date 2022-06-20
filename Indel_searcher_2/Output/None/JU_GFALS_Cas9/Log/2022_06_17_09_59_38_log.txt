@@ -1,0 +1,9 @@
+438080 INFO 2022-06-17 09:59:38,695 : Program start
+438080 INFO 2022-06-17 09:59:38,695 : {'multicore': 8, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': '--user', 'user_name': None, 'project_name': 'JU_GFALS_Cas9', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+438080 INFO 2022-06-17 09:59:38,696 : File num check: input folder and project list
+438080 INFO 2022-06-17 09:59:38,701 : The file list is correct, pass
+
+438080 INFO 2022-06-17 09:59:38,701 : Check that all folder are well created.
+438080 INFO 2022-06-17 09:59:38,705 : All output folders have been created.
+
+438080 INFO 2022-06-17 09:59:38,706 : Program end

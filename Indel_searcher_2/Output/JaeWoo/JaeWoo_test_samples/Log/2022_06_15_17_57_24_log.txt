@@ -1,0 +1,21 @@
+372085 INFO 2022-06-15 17:57:24,980 : Program start
+372085 INFO 2022-06-15 17:57:24,980 : {'multicore': 8, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': './home/anaconda3/envs/CRISPR_toolkit/bin/python3', 'user_name': 'JaeWoo', 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
+372085 INFO 2022-06-15 17:57:24,980 : File num check: input folder and project list
+372085 INFO 2022-06-15 17:57:24,988 : The file list is correct, pass
+
+372085 INFO 2022-06-15 17:57:24,988 : Processing sample : Test_sample	Cas9D7
+
+372085 INFO 2022-06-15 17:57:24,988 : File name : eCas9_rep1_D4.ext
+372085 INFO 2022-06-15 17:57:24,989 : SplitFile
+372085 INFO 2022-06-15 17:57:25,001 : Total lines:400000, Chunk size:400000, Split number:1
+372085 INFO 2022-06-15 17:57:25,436 : MakeReference
+372085 INFO 2022-06-15 17:57:25,436 : MakeIndelSearcherCmd
+372085 INFO 2022-06-15 17:57:25,436 : RunMulticore
+372085 INFO 2022-06-15 17:57:27,239 : MakeOutput
+372085 INFO 2022-06-15 17:57:27,241 : Delete tmp pickles
+372085 INFO 2022-06-15 17:57:27,248 : RunIndelFreqCalculator
+372085 INFO 2022-06-15 17:57:27,267 : Check that all folder are well created.
+372085 WARNING 2022-06-15 17:57:27,273 : The number of samples in the output folder and in the project list does not matched.
+372085 WARNING 2022-06-15 17:57:27,274 : Output folder: 1, Project list samples: 6
+
+372085 INFO 2022-06-15 17:57:27,274 : Program end

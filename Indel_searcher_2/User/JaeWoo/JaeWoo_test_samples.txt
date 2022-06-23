@@ -4,3 +4,5 @@ Test_sample	Cas9D7
 #190819_Nahye_12K_D4_D0_1-Cas9D7	Cas9D7
 #190819_Nahye_12K_D7_2_D0_1-Cas9D7	Cas9D7
 #190819_Nahye_12K_D7_D0_1-Cas9D7	Cas9D7	
+
+# '#'을 맨 처음에 입력해서 해당 라인 무시 가능

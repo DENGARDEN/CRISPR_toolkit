@@ -1,9 +1,0 @@
-440543 INFO 2022-06-17 10:17:58,877 : Program start
-440543 INFO 2022-06-17 10:17:58,878 : {'multicore': 15, 'chunk_number': 400000, 'base_quality': '20', 'gap_open': -10.0, 'gap_extend': 1.0, 'insertion_window': 4, 'deletion_window': 4, 'pam_type': 'Cas9', 'pam_pos': 'Forward', 'python': '--user', 'user_name': None, 'project_name': 'JaeWoo_test_samples', 'pickle': 'False', 'split': 'False', 'class_fastq': 'True', 'ednafull': None}
-440543 INFO 2022-06-17 10:17:58,878 : File num check: input folder and project list
-440543 INFO 2022-06-17 10:17:58,881 : The file list is correct, pass
-
-440543 INFO 2022-06-17 10:17:58,881 : Check that all folder are well created.
-440543 INFO 2022-06-17 10:17:58,884 : All output folders have been created.
-
-440543 INFO 2022-06-17 10:17:58,884 : Program end

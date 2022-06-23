@@ -35,6 +35,7 @@ class clsIndelSearcherRunner(UserFolderAdmin):
         self.strSplit = options.split
         self.strLogPath = InstInitFolder.strLogPath
 
+        ## Files needed in the Reference directory
         self.strBarcodeFile = os.path.join(self.strRefDir, 'Barcode.txt')
         self.strReferenceSeqFile = os.path.join(self.strRefDir, 'Reference_sequence.txt')
         self.strTargetSeqFile = os.path.join(self.strRefDir, 'Target_region.txt')
@@ -58,9 +59,10 @@ class clsIndelSearcherRunner(UserFolderAdmin):
             else:
                 logging.error('Target path is not correct, please make sure the path correctly.')
 
+        ## Files needed in the FASTQ directory
         self.strFastqDir = './Input/{user}/FASTQ/{project}'.format(user=self.strUser,
                                                                    project=self.strProject)
-        ## './Input/JaeWoo/FASTQ/Test_samples/Sample_1'
+        ## './Input/JaeWoo/FASTQ/JaeWoo_test_samples/Test_sample'
         self.strSampleDir = os.path.join(self.strFastqDir, self.strSample)
 
         self.strFastq_name = ''
@@ -69,15 +71,16 @@ class clsIndelSearcherRunner(UserFolderAdmin):
                 self.strFastq_name = '.'.join(strFile.split('.')[:-1])
         logging.info('File name : %s' % self.strFastq_name)
 
-        ## './Input/JaeWoo/FASTQ/Test_samples/Sample_1/Fastq_file.fastq'
+        ## './Input/JaeWoo/FASTQ/JaeWoo_test_samples/Test_sample/eCas9_rep1_D4.ext.fastq'
         self.strInputFile = os.path.join(self.strSampleDir, self.strFastq_name + '.fastq')
-        ## './Input/JaeWoo/FASTQ/Test_samples/Sample_1/Fastq_file.txt'
+        ## './Input/JaeWoo/FASTQ/JaeWoo_test_samples/Test_sample/eCas9_rep1_D4.ext.txt'
         self.strInputList = os.path.join(self.strSampleDir, self.strFastq_name + '.txt')
 
-        ## './Input/JaeWoo/FASTQ/Test_samples/Sample_1/Split_files'
+        ## './Input/JaeWoo/FASTQ/JaeWoo_test1_samples/Test_sample/Split_files'
         self.strSplitPath = os.path.join(self.strSampleDir, 'Split_files')
         Helper.MakeFolderIfNot(self.strSplitPath)
 
+        # TODO: no choice
         self.strPair = 'False'  # FASTQ pair: True, False
 
     def SplitFile(self):
@@ -91,9 +94,13 @@ class clsIndelSearcherRunner(UserFolderAdmin):
         if intSplitNum == 0: intSplitNum = 1
         logging.info('Total lines:%s, Chunk size:%s, Split number:%s' % (intTotalLines, self.intChunkSize, intSplitNum))
 
+        ## Make minibatches of a single sequence file
+        ## self.strInputFile : self.strInputFile : ## './Input/JaeWoo/FASTQ/JaeWoo_test_samples/Test_sample/eCas9_rep1_D4.ext.fastq'
+        ## self.strInputList : self.strInputFile : ## './Input/JaeWoo/FASTQ/JaeWoo_test_samples/Test_sample/eCas9_rep1_D4.ext.txt'
         with open(self.strInputFile) as fq, \
                 open(self.strInputList, 'w') as OutList:
 
+            ## Batch processing
             for intNum in range(1, intSplitNum + 1):
 
                 strSplitFile = self.strSplitPath + '/{sample}_{num}.fq'.format(
@@ -138,11 +145,13 @@ class clsIndelSearcherRunner(UserFolderAdmin):
                 assert len(listBarcode) == len(listTarget) == len(
                     listRef), 'Barcode, Target and Reference must be a same row number.'
 
+                # String pre-processing
                 listName = []
                 for strBar, strTar in zip(listBarcode, listTarget):
                     strBar = strBar.replace('\n', '').replace('\r', '').strip().upper()
                     strTar = strTar.replace('\n', '').replace('\r', '').strip().upper()
 
+                    # The strings should be composed of only A,T,C,G,N
                     Helper.CheckIntegrity(self.strBarcodeFile, strBar)  ## defensive
                     Helper.CheckIntegrity(self.strBarcodeFile, strTar)  ## defensive
 
@@ -352,21 +361,29 @@ def Main():
                 strSample, strRef, strExpCtrl = tupSampleInfo
                 setGroup.add(strExpCtrl)
 
+                # Locating input files in the Reference and FASTQ directory
                 InstRunner = clsIndelSearcherRunner(strSample, strRef, options, InstInitFolder)
-                # """
+
+                # Chunking
                 logging.info('SplitFile')
                 InstRunner.SplitFile()
+
+                # If there is no manually created "Reference.fa", make it for future processing
+                # Need proper "Barcode.txt", "Reference_sequence.txt", "Target_region.txt"
                 logging.info('MakeReference')
                 InstRunner.MakeReference()
+
+                # Generating a command for utilizing Python multiprocessing
+                # This Runner program will execute Indel_searcher_crispresso_hash.py
                 logging.info('MakeIndelSearcherCmd')
                 listCmd = InstRunner.MakeIndelSearcherCmd()
+
                 logging.info('RunMulticore')
                 RunMulticore(listCmd, options.multicore)  ## from CoreSystem.py
                 logging.info('MakeOutput')
                 InstRunner.MakeOutput()
                 logging.info('RunIndelFreqCalculator')
                 InstRunner.RunIndelFreqCalculator()
-                # """
 
             if setGroup == {'EXP', 'CTRL'}:
                 InstRunner.IndelNormalization()

@@ -1,1 +1,1 @@
-~/anaconda3/envs/CRISPR_toolkit/bin/python3s
+~/anaconda3/envs/CRISPR_toolkit/bin/python3

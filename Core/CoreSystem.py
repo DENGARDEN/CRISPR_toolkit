@@ -20,7 +20,7 @@ class Helper(object):
     @staticmethod
     def RemoveNullAndBadKeyword(Sample_list):
         listSamples = [strRow for strRow in Sample_list.readlines() if
-                       strRow not in ["''", '', '""', '\n', '\r', '\r\n']]
+                       strRow not in ["''", '', '""', '\n', '\r', '\r\n'] and strRow[0] != '#']
         return listSamples
 
     @staticmethod  ## defensive
@@ -128,7 +128,7 @@ class InitialFolder(object):
             print('CoreSystem.py -> CoreSystem error, check the script.')
             raise Exception
 
-        ## './Input/JaeWoo/FASTQ/Test_samples'
+        ## './Input/JaeWoo/FASTQ/JaeWoo_test_samples'
         strUserProjectDir = os.path.join(strUserFastqDir, self.strProject)
         Helper.MakeFolderIfNot(strUserProjectDir)
 
@@ -136,7 +136,7 @@ class InitialFolder(object):
         strUserReference = os.path.join(strUserInputDir, 'Reference')
         Helper.MakeFolderIfNot(strUserReference)
 
-        ## './Input/JaeWoo/Reference/Test_samples'
+        ## './Input/JaeWoo/Reference/JaeWoo_test_samples'
         strUserRefProject = os.path.join(strUserReference, self.strProject)
         Helper.MakeFolderIfNot(strUserRefProject)
 
@@ -155,11 +155,11 @@ class InitialFolder(object):
         strOutputUserDir = './Output/{user}'.format(user=self.strUser)
         Helper.MakeFolderIfNot(strOutputUserDir)
 
-        ## './Output/JaeWoo/Test_samples'
+        ## './Output/JaeWoo/JaeWoo_test_samples'
         self.strOutputProjectDir = os.path.join(strOutputUserDir, self.strProject)
         Helper.MakeFolderIfNot(self.strOutputProjectDir)
 
-        ## './Output/JaeWoo/Test_samples/Log'
+        ## './Output/JaeWoo/JaeWoo_test_samples/Log/2022_06_21_20_58_11_log.txt'
         strOutputLog = os.path.join(self.strOutputProjectDir, 'Log')
         Helper.MakeFolderIfNot(strOutputLog)
 
@@ -264,9 +264,10 @@ def CheckProcessedFiles(Func):
         logging.info('File num check: input folder and project list')
         Helper.CheckSameNum(strInputProject, listSamples)
 
+        # RunPipeline(**kwargs)
         Func(**kwargs)
 
-        logging.info('Check that all folder are well created.')
+        logging.info('Check that all folders are well created.')
         Helper.CheckAllDone(InstInitFolder.strOutputProjectDir, listSamples)
 
     return Wrapped_func

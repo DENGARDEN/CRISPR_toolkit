@@ -130,6 +130,7 @@ class clsIndelSearchParser(object):
 
     def SearchBarcodeIndelPosition(self, sBarcode_PAM_pos):
 
+        # dictioanry (d)
         dRef = {}
         dResult = {}
 
@@ -275,7 +276,7 @@ class clsIndelSearchParser(object):
                 try:
                     if self.strPamType == 'CAS9':
                         iKbp_front_Indel_end = iIndel_end_from_barcode_pos - 6  ## cas9:-6, cpf1:-4
-                    elif self.strPamType == 'CAF1':
+                    elif self.strPamType == 'CPF1':
                         iKbp_front_Indel_end = iIndel_end_from_barcode_pos - 4  ## NN(N)*NNN(N)*NNNN
                 except Exception:
                     set_trace()

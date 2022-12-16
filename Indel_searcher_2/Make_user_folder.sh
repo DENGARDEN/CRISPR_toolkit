@@ -1,7 +1,7 @@
 #!/bin/bash
 
-user=UAR
-project=UAR_GFLAS_Cas12
+user=KJY
+project=SAMSUNG
 
 [ ! -d ./Input ] && { mkdir ./Input; }
 [ ! -d ./User ] && { mkdir ./User; }

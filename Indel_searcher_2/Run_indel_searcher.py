@@ -130,36 +130,36 @@ class clsIndelSearcherRunner(UserFolderAdmin):
             sys.exit(1)
 
     def MakeReference(self):
+        # Do always make Reference file for avoiding misuse
 
-        if not os.path.isfile(self.strRefFile):
-            with open(self.strBarcodeFile) as Barcode, \
-                    open(self.strTargetSeqFile) as Target, \
-                    open(self.strReferenceSeqFile) as Ref, \
-                    open(self.strRefFile, 'w') as Output:
+        with open(self.strBarcodeFile) as Barcode, \
+                open(self.strTargetSeqFile) as Target, \
+                open(self.strReferenceSeqFile) as Ref, \
+                open(self.strRefFile, 'w') as Output:
 
-                listBarcode = Helper.RemoveNullAndBadKeyword(Barcode)
-                listTarget = Helper.RemoveNullAndBadKeyword(Target)
-                listRef = Helper.RemoveNullAndBadKeyword(Ref)
+            listBarcode = Helper.RemoveNullAndBadKeyword(Barcode)
+            listTarget = Helper.RemoveNullAndBadKeyword(Target)
+            listRef = Helper.RemoveNullAndBadKeyword(Ref)
 
-                ## defensive
-                assert len(listBarcode) == len(listTarget) == len(
-                    listRef), 'Barcode, Target and Reference must be a same row number.'
+            ## defensive
+            assert len(listBarcode) == len(listTarget) == len(
+                listRef), 'Barcode, Target and Reference must be a same row number.'
 
-                # String pre-processing
-                listName = []
-                for strBar, strTar in zip(listBarcode, listTarget):
-                    strBar = strBar.replace('\n', '').replace('\r', '').strip().upper()
-                    strTar = strTar.replace('\n', '').replace('\r', '').strip().upper()
+            # String pre-processing
+            listName = []
+            for strBar, strTar in zip(listBarcode, listTarget):
+                strBar = strBar.replace('\n', '').replace('\r', '').strip().upper()
+                strTar = strTar.replace('\n', '').replace('\r', '').strip().upper()
 
-                    # The strings should be composed of only A,T,C,G,N
-                    Helper.CheckIntegrity(self.strBarcodeFile, strBar)  ## defensive
-                    Helper.CheckIntegrity(self.strBarcodeFile, strTar)  ## defensive
+                # The strings should be composed of only A,T,C,G,N
+                Helper.CheckIntegrity(self.strBarcodeFile, strBar)  ## defensive
+                Helper.CheckIntegrity(self.strBarcodeFile, strTar)  ## defensive
 
-                    listName.append(strBar + ':' + strTar + '\n')
+                listName.append(strBar + ':' + strTar + '\n')
 
-                for i, strRow in enumerate(listRef):
-                    strRow = strRow.replace('\r', '').strip().upper()
-                    Output.write('>' + listName[i] + strRow + '\n')
+            for i, strRow in enumerate(listRef):
+                strRow = strRow.replace('\r', '').strip().upper()
+                Output.write('>' + listName[i] + strRow + '\n')
 
     def MakeIndelSearcherCmd(self):
 

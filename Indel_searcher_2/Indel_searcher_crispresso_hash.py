@@ -142,11 +142,11 @@ class clsIndelSearchParser(object):
 
             for i, sRow in enumerate(Ref):
 
-                if i % 2 == 0:  ## >CGCTCTACGTAGACA:CTCTATTACTCGCCCCACCTCCCCCAGCCC
+                if i % 2 == 0:  ## >CGCTCTACGTAGACA:CTCTATTACTCGCCCCACCTCCCCCAGCCC; barcode:target_region
                     sBarcode, sTarget_region, intBarcodeLen = self._SeperateFaHeader(sRow, sBarcode, sTarget_region,
                                                                                      intBarcodeLen, sBarcode_PAM_pos)
 
-                elif i % 2 != 0:  ## AGCATCGATCAGCTACGATCGATCGATCACTAGCTACGATCGATCA
+                elif i % 2 != 0:  ## AGCATCGATCAGCTACGATCGATCGATCACTAGCTACGATCGATCA; reference sequecne
                     sRef_seq, iIndel_start_pos, iIndel_end_pos = self._SearchIndelPos(sRow, sBarcode_PAM_pos,
                                                                                       sTarget_region)
 
@@ -229,6 +229,7 @@ class clsIndelSearchParser(object):
 
     def SearchIndel(self, lFASTQ=[], dRef={}, dResult={}, sBarcode_PAM_pos=""):
 
+        # logging.info(dRef.keys())
         # lFASTQ : [(seq, qual),(seq, qual)]
         # lRef   : [(ref_seq, ref_seq_after_barcode, barcode, barcode end pos, indel end pos, indel from barcode),(...)]
         # dResult = [# of total, # of ins, # of del, # of com, [total FASTQ], [ins FASTQ], [del FASTQ], [com FASTQ]]
@@ -274,6 +275,7 @@ class clsIndelSearchParser(object):
                 iIndel_start_from_barcode_pos = lCol_ref[3]
                 iIndel_end_from_barcode_pos = lCol_ref[4]
                 try:
+                    # TODO: check the position of indel
                     if self.strPamType == 'CAS9':
                         iKbp_front_Indel_end = iIndel_end_from_barcode_pos - 6  ## cas9:-6, cpf1:-4
                     elif self.strPamType == 'CPF1':

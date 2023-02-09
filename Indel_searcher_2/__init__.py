@@ -1,0 +1,1 @@
+from Indel_searcher_2.Run_indel_searcher import *

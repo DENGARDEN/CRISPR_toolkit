@@ -3,33 +3,76 @@ import multiprocessing as mp
 import os
 import re
 import subprocess as sp
-import sys
 from datetime import datetime
-from pdb import set_trace
 
 import numpy as np
+import pandas as pd
 from CRISPResso2 import CRISPResso2Align
 
 
 class Helper(object):
-
     @staticmethod
     def MakeFolderIfNot(strDir):
-        if not os.path.isdir(strDir): os.makedirs(strDir)
+        if not os.path.isdir(strDir):
+            os.makedirs(strDir)
 
     @staticmethod
-    def RemoveNullAndBadKeyword(Sample_list):
-        listSamples = [strRow for strRow in Sample_list.readlines() if
-                       strRow not in ["''", '', '""', '\n', '\r', '\r\n'] and strRow[0] != '#']
+    def preprocess_user_file(Sample_list: list):
+        def splitter(strSample: str):
+            logging.info("Processing sample : %s" % strSample)
+            lSampleRef = (
+                strSample.replace("\n", "")
+                .replace("\r", "")
+                .replace(" ", "")
+                .split("\t")
+            )
+            if len(lSampleRef) == 2:
+                strSample = lSampleRef[0]
+                strRef = lSampleRef[1]
+                return (strSample, strRef, "")
+
+            elif len(lSampleRef) == 3:
+                strSample = lSampleRef[0]
+                strRef = lSampleRef[1]
+                strExpCtrl = lSampleRef[2].upper()
+                return (strSample, strRef, strExpCtrl)
+
+            else:
+                logging.error(
+                    "Confirm the file format is correct. -> Sample name\tReference name\tGroup"
+                )
+                logging.error("Sample list input : %s\n" % lSampleRef)
+                raise Exception
+
+        listSamples = [
+            splitter(strRow)
+            for strRow in Sample_list
+            if strRow not in ["''", "", '""', "\n", "\r", "\r\n"] and strRow[0] != "#"
+        ]
+
         return listSamples
+
+    @staticmethod
+    def preprocess_ref_file(ref_list: pd.Series):
+
+        refs = [
+            strRow.replace("\n", "").replace("\r", "").strip().upper()
+            for strRow in list(ref_list)
+            if strRow not in ["''", "", '""', "\n", "\r", "\r\n"]
+        ]
+
+        return refs
 
     @staticmethod  ## defensive
     def CheckSameNum(strInputProject, listSamples):
 
-        listProjectNumInInput = [i for i in
-                                 sp.check_output('ls %s' % strInputProject, shell=True).decode(encoding="utf-8").split(
-                                     '\n') if
-                                 i != '']
+        listProjectNumInInput = [
+            i
+            for i in sp.check_output("ls %s" % strInputProject, shell=True)
+            .decode(encoding="utf-8")
+            .split("\n")
+            if i != ""
+        ]
 
         setSamples = set(listSamples)
         setProjectNumInInput = set(listProjectNumInInput)
@@ -38,94 +81,92 @@ class Helper(object):
         intProjectNumInInput = len(listProjectNumInInput)
 
         if intProjectNumInTxt != len(setSamples - setProjectNumInInput):
-            logging.warning('The number of samples in the input folder and in the project list does not matched.')
-            logging.warning('Input folder: %s, Project list samples: %s' % (intProjectNumInInput, intProjectNumInTxt))
+            logging.warning(
+                "The number of samples in the input folder and in the project list does not matched."
+            )
+            logging.warning(
+                "Input folder: %s, Project list samples: %s"
+                % (intProjectNumInInput, intProjectNumInTxt)
+            )
             raise AssertionError
         else:
-            logging.info('The file list is correct, pass\n')
+            logging.info("The file list is correct, pass\n")
 
     @staticmethod  ## defensive
     def CheckAllDone(strOutputProject, listSamples):
         intProjectNumInOutput = len(
-            [i for i in sp.check_output('ls %s' % strOutputProject, shell=True).decode(encoding="utf-8").split('\n') if
-             i not in ['All_results', 'Log', '']])
+            [
+                i
+                for i in sp.check_output("ls %s" % strOutputProject, shell=True)
+            .decode(encoding="utf-8")
+            .split("\n")
+                if i not in ["All_results", "Log", ""]
+            ]
+        )
 
         if intProjectNumInOutput != len(listSamples):
-            logging.warning('The number of samples in the output folder and in the project list does not matched.')
-            logging.warning('Output folder: %s, Project list samples: %s\n' % (intProjectNumInOutput, len(listSamples)))
+            logging.warning(
+                "The number of samples in the output folder and in the project list does not matched."
+            )
+            logging.warning(
+                "Output folder: %s, Project list samples: %s\n"
+                % (intProjectNumInOutput, len(listSamples))
+            )
         else:
-            logging.info('All output folders have been created.\n')
+            logging.info("All output folders have been created.\n")
 
     @staticmethod
-    def SplitSampleInfo(strSample):
+    def CheckIntegrity(file):  ## defensive
+        import skbio.io
 
-        if strSample[0] == '#': return False
-        logging.info('Processing sample : %s' % strSample)
-        lSampleRef = strSample.replace('\n', '').replace('\r', '').replace(' ', '').split('\t')
-
-        if len(lSampleRef) == 2:
-            strSample = lSampleRef[0]
-            strRef = lSampleRef[1]
-            return (strSample, strRef, '')
-
-        elif len(lSampleRef) == 3:
-            strSample = lSampleRef[0]
-            strRef = lSampleRef[1]
-            strExpCtrl = lSampleRef[2].upper()
-            return (strSample, strRef, strExpCtrl)
-
-        else:
-            logging.error('Confirm the file format is correct. -> Sample name\tReference name\tGroup')
-            logging.error('Sample list input : %s\n' % lSampleRef)
-            raise Exception
-
-    @staticmethod
-    def CheckIntegrity(strBarcodeFile, strSeq):  ## defensive
-        rec = re.compile(r'[A|C|G|T|N]')
-
-        if ':' in strSeq:
-            strSeq = strSeq.split(':')[1]
-
-        strNucle = re.findall(rec, strSeq)
-        if len(strNucle) != len(strSeq):
-            logging.error('This sequence is not suitable, check A,C,G,T,N are used only : %s' % strBarcodeFile)
-            set_trace()
-            sys.exit(1)
+        try:
+            skbio.io.read(
+                file, format='fasta', verify=True
+            )  # fq format verification using skbio
+        except Exception as e:
+            logging.error(
+                "The reference table is not suited for processing, check A,C,G,T,N are used only"
+            )
+            raise e
 
     @staticmethod
     def PreventFromRmMistake(strCmd):
-        rec = re.compile(r'rm.+-rf*.+(\.$|\/$|\*$|User$|Input$|Output$)')  ## This reg can prevent . / * ./User User ...
+        rec = re.compile(
+            r"rm.+-rf*.+(\.$|\/$|\*$|User$|Input$|Output$)"
+        )  ## This reg can prevent . / * ./User User ...
         if re.findall(rec, strCmd):
-            raise Exception('%s is critical mistake! never do like this.' % strCmd)
+            raise Exception("%s is critical mistake! never do like this." % strCmd)
 
 
 class InitialFolder(object):
-
     def __init__(self, strUser, strProject, strProgram):
         self.strUser = strUser
         self.strProject = strProject
         self.strProgram = strProgram
 
     def MakeDefaultFolder(self):
-        Helper.MakeFolderIfNot('Input')
-        Helper.MakeFolderIfNot('Output')
-        Helper.MakeFolderIfNot('User')
+        Helper.MakeFolderIfNot("Input")
+        Helper.MakeFolderIfNot("Output")
+        Helper.MakeFolderIfNot("User")
+
+        self.MakeInputFolder()
+        self.MakeOutputFolder()
 
     def MakeInputFolder(self):
         ## './Input/JaeWoo'
-        strUserInputDir = './Input/{user}'.format(user=self.strUser)
+        strUserInputDir = "./Input/{user}".format(user=self.strUser)
         Helper.MakeFolderIfNot(strUserInputDir)
 
-        if self.strProgram == 'Run_indel_searcher.py':
+        if self.strProgram == "Run_indel_searcher.py":
             ## './Input/JaeWoo/FASTQ'
-            strUserFastqDir = os.path.join(strUserInputDir, 'FASTQ')
+            strUserFastqDir = os.path.join(strUserInputDir, "FASTQ")
             Helper.MakeFolderIfNot(strUserFastqDir)
-        elif self.strProgram == 'Run_BaseEdit_freq.py':
+        elif self.strProgram == "Run_BaseEdit_freq.py":
             ## './Input/JaeWoo/Query'
-            strUserFastqDir = os.path.join(strUserInputDir, 'Query')
+            strUserFastqDir = os.path.join(strUserInputDir, "Query")
             Helper.MakeFolderIfNot(strUserFastqDir)
         else:
-            print('CoreSystem.py -> CoreSystem error, check the script.')
+            print("CoreSystem.py -> CoreSystem error, check the script.")
             raise Exception
 
         ## './Input/JaeWoo/FASTQ/JaeWoo_test_samples'
@@ -133,7 +174,7 @@ class InitialFolder(object):
         Helper.MakeFolderIfNot(strUserProjectDir)
 
         ## './Input/JaeWoo/Reference'
-        strUserReference = os.path.join(strUserInputDir, 'Reference')
+        strUserReference = os.path.join(strUserInputDir, "Reference")
         Helper.MakeFolderIfNot(strUserReference)
 
         ## './Input/JaeWoo/Reference/JaeWoo_test_samples'
@@ -141,18 +182,18 @@ class InitialFolder(object):
         Helper.MakeFolderIfNot(strUserRefProject)
 
         ## './User/JaeWoo'
-        strUserDir = './User/{user}'.format(user=self.strUser)
+        strUserDir = "./User/{user}".format(user=self.strUser)
         Helper.MakeFolderIfNot(strUserDir)
 
         ## '> ./User/JaeWoo/Test_samples.txt'
-        self.strProjectFile = os.path.join(strUserDir, self.strProject + '.txt')
+        self.strProjectFile = os.path.join(strUserDir, self.strProject + ".txt")
         if not os.path.isfile(self.strProjectFile):
-            sp.call('> ' + self.strProjectFile, shell=True)
+            sp.call("> " + self.strProjectFile, shell=True)
 
     def MakeOutputFolder(self):
 
         ## './Output/JaeWoo'
-        strOutputUserDir = './Output/{user}'.format(user=self.strUser)
+        strOutputUserDir = "./Output/{user}".format(user=self.strUser)
         Helper.MakeFolderIfNot(strOutputUserDir)
 
         ## './Output/JaeWoo/JaeWoo_test_samples'
@@ -160,11 +201,19 @@ class InitialFolder(object):
         Helper.MakeFolderIfNot(self.strOutputProjectDir)
 
         ## './Output/JaeWoo/JaeWoo_test_samples/Log/2022_06_21_20_58_11_log.txt'
-        strOutputLog = os.path.join(self.strOutputProjectDir, 'Log')
+        strOutputLog = os.path.join(self.strOutputProjectDir, "Log")
         Helper.MakeFolderIfNot(strOutputLog)
 
-        strLogName = str(datetime.now()).replace('-', '_').replace(':', '_').replace(' ', '_').split('.')[0]
-        self.strLogPath = os.path.join(self.strOutputProjectDir, 'Log/{logname}_log.txt'.format(logname=strLogName))
+        strLogName = (
+            str(datetime.now())
+            .replace("-", "_")
+            .replace(":", "_")
+            .replace(" ", "_")
+            .split(".")[0]
+        )
+        self.strLogPath = os.path.join(
+            self.strOutputProjectDir, "Log/{logname}_log.txt".format(logname=strLogName)
+        )
 
 
 class UserFolderAdmin(object):
@@ -188,41 +237,45 @@ class UserFolderAdmin(object):
         self.strGapExtend = options.gap_extend  #
         self.strPython = options.python
 
-        self.strOutProjectDir = ''
-        self.strOutSampleDir = ''
-        self.strRefDir = ''
+        self.strOutProjectDir = ""
+        self.strOutSampleDir = ""
+        self.strRefDir = ""
 
-    def MakeSampleFolder(self):
+    def struct_output_dir(self):
         ## './Output/Jaewoo/Test_samples'
-        self.strOutProjectDir = './Output/{user}/{project}'.format(user=self.strUser, project=self.strProject)
+        self.strOutProjectDir = "./Output/{user}/{project}".format(
+            user=self.strUser, project=self.strProject
+        )
 
         ## './Output/Jaewoo/Test_samples/Sample_1'
         self.strOutSampleDir = os.path.join(self.strOutProjectDir, self.strSample)
         Helper.MakeFolderIfNot(self.strOutSampleDir)
 
         ## './Output/Jaewoo/Test_samples/Sample_1/Tmp'
-        Helper.MakeFolderIfNot(os.path.join(self.strOutSampleDir, 'Tmp'))
+        Helper.MakeFolderIfNot(os.path.join(self.strOutSampleDir, "Tmp"))
 
         ## './Output/Jaewoo/Test_samples/Sample_1/Tmp/Pickle'
-        Helper.MakeFolderIfNot(os.path.join(self.strOutSampleDir, 'Tmp/Pickle'))
+        Helper.MakeFolderIfNot(os.path.join(self.strOutSampleDir, "Tmp/Pickle"))
 
         ## './Output/Jaewoo/Test_samples/Sample_1/Result'
-        Helper.MakeFolderIfNot(os.path.join(self.strOutSampleDir, 'Result'))
+        Helper.MakeFolderIfNot(os.path.join(self.strOutSampleDir, "Result"))
 
         ## './Output/Jaewoo/Test_samples/All_results
-        strAllResultDir = os.path.join(self.strOutProjectDir, 'All_results')
+        strAllResultDir = os.path.join(self.strOutProjectDir, "All_results")
         Helper.MakeFolderIfNot(strAllResultDir)
 
-        self.strRefDir = './Input/{user}/Reference/{project}/{ref}'.format(user=self.strUser,
-                                                                           project=self.strProject,
-                                                                           ref=self.strRef)
+        self.strRefDir = "./Input/{user}/Reference/{project}/{ref}".format(
+            user=self.strUser, project=self.strProject, ref=self.strRef
+        )
 
 
 class CoreHash(object):
-
     @staticmethod
     def MakeHashTable(strSeq, intBarcodeLen):
-        listSeqWindow = [strSeq[i:i + intBarcodeLen] for i in range(len(strSeq))[:-intBarcodeLen - 1]]
+        listSeqWindow = [
+            strSeq[i: i + intBarcodeLen]
+            for i in range(len(strSeq))[: -intBarcodeLen - 1]
+        ]
         return listSeqWindow
 
     @staticmethod
@@ -235,8 +288,7 @@ class CoreHash(object):
 
 
 class CoreGotoh(object):
-
-    def __init__(self, strEDNAFULL='', floOg='', floOe=''):
+    def __init__(self, strEDNAFULL="", floOg="", floOe=""):
         self.npAlnMatrix = CRISPResso2Align.read_matrix(strEDNAFULL)
         self.floOg = floOg
         self.floOe = floOe
@@ -247,50 +299,56 @@ class CoreGotoh(object):
         npGapIncentive = np.zeros(intAmpLen + 1, dtype=np.int)
         return npGapIncentive
 
-    def RunCRISPResso2(self, strQuerySeqAfterBarcode, strRefSeqAfterBarcode, npGapIncentive):
-        listResult = CRISPResso2Align.global_align(strQuerySeqAfterBarcode.upper(), strRefSeqAfterBarcode.upper(),
-                                                   matrix=self.npAlnMatrix, gap_open=self.floOg, gap_extend=self.floOe,
-                                                   gap_incentive=npGapIncentive)
+    def RunCRISPResso2(
+        self, strQuerySeqAfterBarcode, strRefSeqAfterBarcode, npGapIncentive
+    ):
+        listResult = CRISPResso2Align.global_align(
+            strQuerySeqAfterBarcode.upper(),
+            strRefSeqAfterBarcode.upper(),
+            matrix=self.npAlnMatrix,
+            gap_open=self.floOg,
+            gap_extend=self.floOe,
+            gap_incentive=npGapIncentive,
+        )
         return listResult
 
 
 def CheckProcessedFiles(Func):
     def Wrapped_func(**kwargs):
-        InstInitFolder = kwargs['InstInitFolder']
-        strInputProject = kwargs['strInputProject']
-        listSamples = kwargs['listSamples']
-        logging = kwargs['logging']
+        kwargs["logger"].info("File num check: input folder and project list")
+        Helper.CheckSameNum(kwargs["strInputProject"], kwargs["listSamples"])
 
-        logging.info('File num check: input folder and project list')
-        Helper.CheckSameNum(strInputProject, listSamples)
+        Func(**kwargs)  # Run the function
 
-        # RunPipeline(**kwargs)
-        Func(**kwargs)
-
-        logging.info('Check that all folders are well created.')
-        Helper.CheckAllDone(InstInitFolder.strOutputProjectDir, listSamples)
+        kwargs["logger"].info("Check that all folders are well created.")
+        Helper.CheckAllDone(
+            kwargs["InstInitFolder"].strOutputProjectDir, kwargs["listSamples"]
+        )
 
     return Wrapped_func
 
 
-def AttachSeqToIndel(strSample, strBarcodeName, strIndelPos,
-                     strRefseq, strQueryseq, dictSub):
-    listIndelPos = strIndelPos.split('M')
+def AttachSeqToIndel(
+    strSample, strBarcodeName, strIndelPos, strRefseq, strQueryseq, dictSub
+):
+    listIndelPos = strIndelPos.split("M")
     intMatch = int(listIndelPos[0])
 
-    if 'I' in strIndelPos:
-        intInsertion = int(listIndelPos[1].replace('I', ''))
-        strInDelSeq = strQueryseq[intMatch:intMatch + intInsertion]
+    if "I" in strIndelPos:
+        intInsertion = int(listIndelPos[1].replace("I", ""))
+        strInDelSeq = strQueryseq[intMatch: intMatch + intInsertion]
 
-    elif 'D' in strIndelPos:
-        intDeletion = int(listIndelPos[1].replace('D', ''))
-        strInDelSeq = strRefseq[intMatch:intMatch + intDeletion]
+    elif "D" in strIndelPos:
+        intDeletion = int(listIndelPos[1].replace("D", ""))
+        strInDelSeq = strRefseq[intMatch: intMatch + intDeletion]
 
     else:
-        logging.info('strIndelClass is included I or D. This variable is %s' % strIndelPos)
+        logging.info(
+            "strIndelClass is included I or D. This variable is %s" % strIndelPos
+        )
         raise Exception
 
-    strInDelPosSeq = strIndelPos + '_' + strInDelSeq
+    strInDelPosSeq = strIndelPos + "_" + strInDelSeq
 
     try:
         _ = dictSub[strSample][strBarcodeName]
@@ -299,23 +357,31 @@ def AttachSeqToIndel(strSample, strBarcodeName, strIndelPos,
 
     try:
 
-        dictSub[strSample][strBarcodeName][strBarcodeName + ':' + strInDelPosSeq]['IndelCount'] += 1
+        dictSub[strSample][strBarcodeName][strBarcodeName + ":" + strInDelPosSeq][
+            "IndelCount"
+        ] += 1
     except KeyError:
-        dictSub[strSample][strBarcodeName][strBarcodeName + ':' + strInDelPosSeq] = {'IndelCount': 1}
+        dictSub[strSample][strBarcodeName][strBarcodeName + ":" + strInDelPosSeq] = {
+            "IndelCount": 1
+        }
 
 
 def RunProgram(sCmd):
     sp.run(sCmd, shell=True)
 
 
-def RunMulticore(lCmd, iCore):
-    """
-
-    """
+def RunMulticore(runner_instance, iCore):
+    import pathlib
+    from concurrent.futures import ProcessPoolExecutor
+    
+    lCmd = [
+        entry for entry in list(pathlib.Path(runner_instance.strSplitPath).glob("*.fa"))
+    ]
+    
 
     for sCmd in lCmd:
         print(sCmd)
-
+    
     p = mp.Pool(iCore)
     p.map_async(RunProgram, lCmd).get()
     p.close()

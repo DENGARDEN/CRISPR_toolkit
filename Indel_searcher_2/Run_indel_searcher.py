@@ -1,14 +1,10 @@
-#!/usr/bin/env python
-
 import logging
 import os
-
 # import cPickle as pickle
 import pickle
 import subprocess as sp
 import sys
 
-sys.path.insert(0, os.path.dirname(os.getcwd()))
 from Core.CoreSystem import (
     InitialFolder,
     UserFolderAdmin,
@@ -16,6 +12,7 @@ from Core.CoreSystem import (
     RunMulticore,
     CheckProcessedFiles,
 )
+from Indel_searcher_2 import Indel_searcher_crispresso_hash
 
 
 class clsIndelSearcherRunner(UserFolderAdmin):
@@ -45,7 +42,7 @@ class clsIndelSearcherRunner(UserFolderAdmin):
         self.strClassFASTQ = args.class_fastq
         self.strSplit = args.split
         self.strLogPath = InstInitFolder.strLogPath
-        self.strRefFile = os.path.join(self.strRefDir, 'Reference.fa')
+        self.strRefFile = os.path.join(self.strRefDir, "Reference.fa")
 
         ## Files needed in the FASTQ directory
         self.strFastqDir = "./Input/{user}/FASTQ/{project}".format(
@@ -108,6 +105,10 @@ class clsIndelSearcherRunner(UserFolderAdmin):
 
         # The strings should be composed of only A,T,C,G,N
         Helper.CheckIntegrity(self.strRefFile)  ## defensive
+
+    def run(self, sCmd):
+
+        Indel_searcher_crispresso_hash.global_alignment_crispresso(self, sCmd)
 
     def RunIndelFreqCalculator(self):
         sp.call(

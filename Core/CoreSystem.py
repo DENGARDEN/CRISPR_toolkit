@@ -1,5 +1,4 @@
 import logging
-import multiprocessing as mp
 import os
 import re
 import subprocess as sp
@@ -366,22 +365,18 @@ def AttachSeqToIndel(
         }
 
 
-def RunProgram(sCmd):
-    sp.run(sCmd, shell=True)
-
-
 def RunMulticore(runner_instance, iCore):
     import pathlib
     from concurrent.futures import ProcessPoolExecutor
-    
+
     lCmd = [
-        entry for entry in list(pathlib.Path(runner_instance.strSplitPath).glob("*.fa"))
+        entry for entry in list(pathlib.Path(runner_instance.strSplitPath).glob("*.fq"))
     ]
-    
 
     for sCmd in lCmd:
         print(sCmd)
-    
-    p = mp.Pool(iCore)
-    p.map_async(RunProgram, lCmd).get()
-    p.close()
+
+    for executor in ProcessPoolExecutor(max_workers=iCore).map(
+        runner_instance.run, lCmd
+    ):
+        pass

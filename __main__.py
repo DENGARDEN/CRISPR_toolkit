@@ -101,6 +101,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if MODE == 1:
-        import Indel_searcher_2
+        from Indel_searcher_2 import Run_indel_searcher
 
-        Indel_searcher_2.indel_searcher_runner(args)
+        Run_indel_searcher.indel_searcher_runner(args)

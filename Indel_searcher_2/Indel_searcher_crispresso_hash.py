@@ -8,6 +8,7 @@ from pdb import set_trace
 from typing import Tuple
 
 import numpy as np
+import pandas as pd
 
 from Core.CoreSystem import CoreHash, CoreGotoh
 
@@ -98,25 +99,22 @@ class clsIndelSearchParser(object):
 
             df[["sBarcode", "sTarget_region"]] = pd.DataFrame(
                 df["id"]
-                .transform(self._SeperateFaHeader, sBarcode_PAM_pos=sBarcode_PAM_pos)
+                .apply(self._SeperateFaHeader, sBarcode_PAM_pos=sBarcode_PAM_pos)
                 .tolist(),
                 index=df.index,
             )
 
             df[["sRef_seq", "iIndel_start_pos", "iIndel_end_pos"]] = pd.DataFrame(
                 df[["seq", "sTarget_region"]]
-                .transform(self._SearchIndelPos, sBarcode_PAM_pos=sBarcode_PAM_pos)
+                .apply(self._SearchIndelPos, sBarcode_PAM_pos=sBarcode_PAM_pos, axis=1)
                 .tolist(),
                 index=df.index,
             )
+            df = df.apply(
+                self._MakeRefAndResultTemplate, dRef=dRef, dResult=dResult, axis=1
+            )
 
-            # TODO: Sequence length validation
-            # if intBarcodeLen > 0:
-            #     assert intBarcodeLen == len(
-            #         sBarcode
-            #     ), "All of the barcode lengths must be same."
-            #     intBarcodeLen = len(sBarcode)
-
+            assert df["sBarcode"].str.len().value_counts().shape[0] == 1
             ######################################################################################
             for i, sRow in enumerate(Ref):
 
@@ -152,6 +150,14 @@ class clsIndelSearchParser(object):
         return dRef, dResult
 
     def _SeperateFaHeader(self, sRow, sBarcode_PAM_pos):
+        """
+        > The function takes a string (a row from a fasta file) and a string (the position of the PAM
+        site) and returns two strings (the barcode and the target region)
+
+        :param sRow: the row of the fasta file
+        :param sBarcode_PAM_pos: The position of the PAM sequence
+        :return: sBarcode, sTarget_region
+        """
 
         #      barcode               target region
         # >CGCTCTACGTAGACA:CTCTATTACTCGCCCCACCTCCCCCAGCCC
@@ -167,36 +173,60 @@ class clsIndelSearchParser(object):
 
         return sBarcode, sTarget_region
 
-    def _SearchIndelPos(self, sRow, sBarcode_PAM_pos):
-        # df[["seq", "sTarget_region"]]
-        sRef_seq = sRow.strip().replace("\n", "").replace("\r", "")
+    def _SearchIndelPos(
+        self, sRow: pd.Series, sBarcode_PAM_pos: str
+    ) -> Tuple[str, int, int]:
+        """
+        > This function is to find the candidate indel position, which is the "target sequences" of Input files, on the reference sequence
+
+        :param sRow: pd.Series
+        :type sRow: pd.Series
+        :param sBarcode_PAM_pos: "Forward" or "Reverse"
+        :type sBarcode_PAM_pos: str
+
+        :rtype Tuple[str, int, int]
+        """
+        # df[["seq", "sTarget_region"]] => pd.Series
+        sRef_seq = sRow["seq"].strip().replace("\n", "").replace("\r", "")
+        sTarget_region = (
+            sRow["sTarget_region"].strip().replace("\n", "").replace("\r", "")
+        )
 
         if sBarcode_PAM_pos == "Reverse":
             sRef_seq = sRef_seq[::-1]
 
-        Seq_matcher = re.compile(r"(?=(%s))" % sTarget_region)
-        # iIndel_start_pos       = sRef_seq.index(sTarget_region)               # There is possible to exist two indel.
-        iIndel_start_pos = Seq_matcher.finditer(sRef_seq)
+        Seq_matcher = re.compile(f"(?=({sTarget_region}))")
+        iIndel_start_pos = Seq_matcher.finditer(
+            sRef_seq
+        )  # There is possible to exist two indel.
 
-        for i, match in enumerate(iIndel_start_pos):
+        for _, match in enumerate(
+            iIndel_start_pos
+        ):  # Caveat: If there are two indel, only the last indel position is considered
             iIndel_start_pos = match.start()
-        # print iIndel_start_pos
-        # print len(sTarget_region)
-        # print sRef_seq
+
         iIndel_end_pos = iIndel_start_pos + len(sTarget_region) - 1
+
+        assert iIndel_end_pos < len(
+            sRef_seq
+        ), "The indel position is out of the reference sequence."
 
         return (sRef_seq, iIndel_start_pos, iIndel_end_pos)
 
     def _MakeRefAndResultTemplate(
         self,
-        sRef_seq,
-        sBarcode,
-        iIndel_start_pos,
-        iIndel_end_pos,
-        sTarget_region,
+        df: pd.DataFrame,
         dRef,
         dResult,
     ):
+        sRef_seq, sBarcode, iIndel_start_pos, iIndel_end_pos, sTarget_region = (
+            df["sRef_seq"],
+            df["sBarcode"],
+            df["iIndel_start_pos"],
+            df["iIndel_end_pos"],
+            df["sTarget_region"],
+        )
+
         iBarcode_start_pos = sRef_seq.index(sBarcode)
 
         # if iIndel_start_pos <= iBarcode_start_pos:

@@ -1,2 +1,7 @@
 *.txt
 *.json
+*.fq
+*.tsv
+*.fastq
+*.fa
+*.csv

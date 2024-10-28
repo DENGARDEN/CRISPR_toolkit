@@ -131,7 +131,7 @@ class clsIndelSearcherRunner(UserFolderAdmin):
             "cat {splited}/*.fq | wc -l".format(splited=self.strSplitPath), shell=True
         )
         # strOrigianlWc = strOriginal.split()[0]
-        intSplitedWc = int(strSplited.replace("\n", ""))
+        intSplitedWc = int(strSplited.decode().replace("\n", ""))
 
         if intTotalLines != intSplitedWc:
             logging.error(

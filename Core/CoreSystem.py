@@ -240,7 +240,7 @@ class CoreGotoh(object):
     def GapIncentive(self, strRefSeqAfterBarcode):
         ## cripsress no incentive == gotoh
         intAmpLen = len(strRefSeqAfterBarcode)
-        npGapIncentive = np.zeros(intAmpLen + 1, dtype=np.int)
+        npGapIncentive = np.zeros(intAmpLen + 1, dtype=int)
         return npGapIncentive
 
     def RunCRISPResso2(self, strQuerySeqAfterBarcode, strRefSeqAfterBarcode, npGapIncentive):

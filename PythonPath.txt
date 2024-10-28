@@ -1,1 +1,1 @@
-/media/hkim/Pipeline/Indel_searcher_2/miniconda2/bin/python
+/mnt/P41/Repositories/CRISPResso2/.conda/bin/python

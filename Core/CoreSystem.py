@@ -24,7 +24,7 @@ class Helper(object):
     @staticmethod ## defensive
     def CheckSameNum(strInputProject, listSamples):
 
-        listProjectNumInInput = [i for i in sp.check_output('ls %s' % strInputProject, shell=True).split('\n') if i != '']
+        listProjectNumInInput = [i for i in sp.check_output('ls %s' % strInputProject, shell=True).decode().split('\n') if i != '']
 
         setSamples           = set(listSamples)
         setProjectNumInInput = set(listProjectNumInInput)
@@ -41,7 +41,7 @@ class Helper(object):
 
     @staticmethod ## defensive
     def CheckAllDone(strOutputProject, listSamples):
-        intProjectNumInOutput = len([i for i in sp.check_output('ls %s' % strOutputProject, shell=True).split('\n') if i not in ['All_results', 'Log', '']])
+        intProjectNumInOutput = len([i for i in sp.check_output('ls %s' % strOutputProject, shell=True).decode().split('\n') if i not in ['All_results', 'Log', '']])
 
         if intProjectNumInOutput != len(listSamples):
             logging.warning('The number of samples in the output folder and in the project list does not matched.')

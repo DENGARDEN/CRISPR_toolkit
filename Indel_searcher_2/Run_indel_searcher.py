@@ -194,7 +194,7 @@ class clsIndelSearcherRunner(UserFolderAdmin):
                 Helper.CheckIntegrity(self.strBarcodeFile, strBar)  ## defensive
                 Helper.CheckIntegrity(self.strBarcodeFile, strTar)  ## defensive
 
-                listName.append(strBar + ":" + strTar + "\n")
+                listName.append(strBar + ":" + strTar + "\n")   # Barcode:Target
 
             for i, strRow in enumerate(listRef):
                 strRow = strRow.replace("\r", "").strip().upper()

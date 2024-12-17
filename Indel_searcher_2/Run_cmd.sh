@@ -18,6 +18,7 @@ gap_extend=1 ## default
 while read python_path; do
     python=$python_path
 done <../PythonPath.txt
+done <../PythonPath.txt
 
 [ ! -d ./Output/${user} ] && eval mkdir ./Output/${user}
 [ ! -d ./Output/${user}/${project} ] && eval mkdir ./Output/${user}/${project}
